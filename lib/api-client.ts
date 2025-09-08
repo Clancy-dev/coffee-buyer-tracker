@@ -8,6 +8,8 @@ const getAuthToken = (): string | null => {
   return localStorage.getItem("auth-token")
 }
 
+//sample
+
 // Helper function to make authenticated requests
 const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
   const token = getAuthToken()
