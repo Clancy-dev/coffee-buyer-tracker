@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User preferences
+  sortPreference String @default("newest")
+
+  // Relations
+  buyers CoffeeBuyer[]
+
+  @@map("users")
+}
+
+model CoffeeBuyer {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  phoneNumber       String?
+  email             String?
+  lastContacted     DateTime?
+  feedback          String?
+  expectation       Expectation @default(MEDIUM)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  userId            String @db.ObjectId
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialMediaHandles SocialMediaHandle[]
+  contactHistory    ContactHistory[]
+
+  @@map("coffee_buyers")
+}
+
+model SocialMediaHandle {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  platform  SocialPlatform
+  username  String
+  url       String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  buyerId   String @db.ObjectId
+  buyer     CoffeeBuyer @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@map("social_media_handles")
+}
+
+model ContactHistory {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  contactType ContactType @default(OTHER)
+  message     String?
+  contactDate DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  buyerId     String @db.ObjectId
+  buyer       CoffeeBuyer @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@map("contact_history")
+}
+
+enum Expectation {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  X
+  TIKTOK
+  YOUTUBE
+  FACEBOOK
+  LINKEDIN
+  WHATSAPP
+}
+
+enum ContactType {
+  CALL
+  EMAIL
+  MESSAGE
+  MEETING
+  OTHER
+}
